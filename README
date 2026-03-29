@@ -1,0 +1,182 @@
+# 実行環境の構築と実行方法
+
+## 1. 実行するまでの環境構築手順
+
+### 1-1. Anaconda / Miniconda を用意する
+Anaconda または Miniconda が使える状態にしてください。
+
+### 1-2. リポジトリのルートへ移動する
+`train.py` があるディレクトリに移動します。
+
+```bash
+cd DINOv2_pca_visualization
+```
+### 1-4. CUDA 環境を作る場合
+```bash
+source ~/.bashrc
+chmod +x create_env_cuda.sh
+./create_env_cuda.sh 12.0
+conda activate viewpoint-graph
+python check_env.py
+```
+
+`12.0` の部分は、使用する GPU / ドライバ環境に合わせて変更してください。
+
+---
+
+## 2. 実行手順
+
+### 2-1. 単一 seed で実行
+```bash
+python train.py --config configs/proposed_final_tokcut_dinov2_k16.yaml
+```
+
+### 2-2. 複数 seed で実行
+```bash
+python train.py --config configs/proposed_final_tokcut_dinov2_k16.yaml --seeds 0 1 2
+```
+
+## データセットパスのエラー
+/configs/proposed_final_tokcut_dinov2_k16.yamlの中身のdata_rootを変更したら治ります
+
+---
+
+## 3. コマンドの属性
+
+## `train.py`
+### 基本形
+```bash
+python train.py --config <configファイル>
+```
+
+### 属性
+
+#### `--config`
+使用する設定ファイルを指定します。
+
+例:
+```bash
+python train.py --config configs/proposed_final_tokcut_dinov2_k16.yaml
+```
+
+#### `--seeds`
+実行する seed を複数指定します。省略した場合は `0` が使われます。
+
+例:
+```bash
+python train.py --config configs/proposed_final_tokcut_dinov2_k16.yaml --seeds 0 1 2
+```
+
+---
+
+## 4. データセット
+
+以下からダウンロードしてdataディレクトリに配置してくださいs
+
+---
+
+## 5. config の使い方
+
+設定ファイルは YAML 形式です。  
+実行時には `--config` でこのファイルを指定します。
+
+例:
+```bash
+python train.py --config configs/proposed_final_tokcut_dinov2_k16.yaml
+```
+
+### 各項目の意味
+
+#### `data_root`
+データセットのルートディレクトリです。
+
+#### `script_root`
+プロジェクトルートです。  
+`train.py` は内部で `script_root/tools/` を参照して各スクリプトを実行します。
+
+#### `out_root`
+実験結果の出力先ディレクトリです。
+
+---
+
+### `graph`
+グラフ構築段階の設定です。
+
+#### `seed`
+乱数 seed です。
+
+#### `k`
+グラフ構築時のクラスタ数です。
+
+#### `tokencut_backbone`
+TokenCut に使うバックボーンです。
+
+#### `tok_resize`
+TokenCut で前景を作るときの画像サイズです。
+
+#### `img_size`
+DINOv2 によるグラフ構築時の画像サイズです。
+
+#### `fg_mode`
+前景の作り方です。通常は `tokencut` を使います。
+
+#### `tau`
+TokenCut の affinity threshold です。
+
+#### `max_images`
+処理する画像数の上限です。`0` の場合は全画像を処理します。
+
+---
+
+### `rep`
+representative graph 構築段階の設定です。
+
+#### `alpha`
+FGW の混合係数です。
+
+---
+
+### `megagraph`
+megagraph 構築段階の設定です。
+
+#### `top_frac`
+自動 threshold 推定時に使う上位割合です。
+
+#### `alpha`
+FGW の混合係数です。
+
+---
+
+### `infer`
+最終推論段階の設定です。
+
+#### `alpha`
+FGW の混合係数です。
+
+#### `partial_mass`
+partial FGW で輸送する質量比です。
+
+#### `topk`
+保持する上位予測数です。
+
+#### `max_queries`
+評価する query 数の上限です。`0` の場合は全 query を使います。
+
+
+# 分析実行コマンド
+この分析では、各グラフの可視化画像が出力されます。
+
+python analysis/export_run_analysis_png.py \
+  --run-dir results/seed_0_k_16 \
+  --structure-test 30 \
+  --export-pfgw-top5 30
+
+# アブレーション
+各アブレーション実験が可能です。
+
+python analysis/run_ablation_analysis.py \
+  --run-dir results/seed_0_k_16 \
+  --out-dir results/seed_0_k_16/ablation_analysis \
+  --run-tokencut-off
+
+  python analysis/run_ablation_analysis.py   --run-dir results/seed_0_k_16   --out-dir results/seed_0_k_16/ablation_analysis   --skip-structure-classification   --rep-direction-mode partial   --save-legacy-rep-direction-outputs

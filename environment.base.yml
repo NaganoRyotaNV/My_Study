@@ -1,0 +1,19 @@
+name: viewpoint-graph
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - numpy
+  - scipy
+  - scikit-learn
+  - pillow
+  - pyyaml
+  - matplotlib
+  - opencv
+  - pot
+  - pytorch
+  - torchvision
+  - tqdm
+  - pip
+  - git
+  - scikit-image

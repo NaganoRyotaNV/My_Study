@@ -1,0 +1,26 @@
+data_root: ../data/Pascal3D+/Pascal3D_restored_from_release1p1
+script_root: ..
+out_root: ../results
+
+graph:
+  seed: 0
+  k: 16
+  tokencut_backbone: dino
+  tok_resize: 480
+  img_size: 448
+  fg_mode: tokencut
+  tau: 0.2
+  max_images: 0
+
+rep:
+  alpha: 0.3
+
+megagraph:
+  top_frac: 0.2
+  alpha: 0.3
+
+infer:
+  alpha: 0.3
+  partial_mass: 0.7
+  topk: 5
+  max_queries: 0
